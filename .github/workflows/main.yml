@@ -1,0 +1,34 @@
+name: Update Stats File
+
+on:
+  workflow_dispatch:
+    inputs:
+      stats:
+        description: 'The text content from Shortcuts'
+        required: true
+
+# Grants permission to push changes without a PAT
+permissions:
+  contents: write
+
+jobs:
+  statbot-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Save Text to File
+        # Uses '>' to overwrite the file each time.
+        # Change to '>>' if you want to keep adding to the list (append).
+        run: |
+          echo "${{ inputs.stats }}" > stats.txt
+
+      - name: Commit and Push
+        run: |
+          git config user.name "statbot"
+          git config user.email "statbot@users.noreply.github.com"
+          git add stats.txt
+          # '|| exit 0' stops the error if the text hasn't changed
+          git commit -m "statbot log entry" || exit 0
+          git push
